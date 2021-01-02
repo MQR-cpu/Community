@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mqr.community.dao.DiscussPostMapper">
+    <sql id="selectFields">
+        id, user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
+    <sql id="insertFields">
+         user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
+    <sql id="table">
+        discuss_post
+    </sql>
+
+    <select id="selectDiscussPorts" resultType="discussPost" >
+        select <include refid="selectFields"></include>
+        from <include refid="table"></include>
+        where status != 2
+        <if test="userId != 0">
+            and user_id=#{userId}
+        </if>
+        <if test="orderMode == 0">
+            order by status desc ,create_time desc
+        </if>
+        <if test="orderMode == 1">
+            order by status desc ,score desc ,create_time desc
+        </if>
+        limit #{offset},#{limit}
+
+    </select>
+
+
+    <select id="selectDiscussPortCounts" resultType="int">
+
+        select count(id)
+        from <include refid="table"></include>
+        where status != 2
+        <if test="userId != 0">
+            and user_id=#{userId}
+        </if>
+    </select>
+
+<!--    insert语句必须加keyProperty-->
+    <insert id="insertDiscussPost" parameterType="DiscussPost" keyProperty="id">
+        insert into <include refid="table"></include> (<include refid="insertFields"></include>)
+        values (#{userId},#{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
+    </insert>
+
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from <include refid="table"></include>
+        where id = #{id}
+    </select>
+
+    <update id="updateCommentCount">
+        update discuss_post set comment_count = #{commentCount} where id = #{id}
+    </update>
+
+    <update id="updateType">
+        update discuss_post
+        set type = #{type}
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update discuss_post
+        set status = #{status}
+        where id = #{id}
+    </update>
+
+    <update id="updateScore" >
+        update discuss_post
+        set score = #{score}
+        where id = #{id}
+    </update>
+
+</mapper>
